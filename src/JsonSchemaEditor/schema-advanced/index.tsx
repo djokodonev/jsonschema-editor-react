@@ -3,33 +3,32 @@ import { AdvancedString } from "../advanced-string";
 import { AdvancedNumber } from "../advanced-number";
 import { AdvancedBoolean } from "../advanced-boolean";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
-import { State, useHookstate } from "@hookstate/core";
-import { Form } from "react-bootstrap";
 
 export interface AdvancedSettingsProps {
-  itemStateProp: State<JSONSchema7>;
+  item: JSONSchema7;
+  onUpdate: (updater: (item: JSONSchema7) => JSONSchema7) => void;
 }
 
 export const AdvancedSettings: React.FunctionComponent<
   AdvancedSettingsProps
 > = (props: React.PropsWithChildren<AdvancedSettingsProps>) => {
-  const itemState = useHookstate(props.itemStateProp);
+  const { item, onUpdate } = props;
 
-  const getAdvancedView = (
-    item: State<JSONSchema7>,
-  ): JSX.Element | undefined => {
-    switch (itemState.type.value) {
+  const itemType = Array.isArray(item.type) ? item.type[0] : item.type;
+
+  const getAdvancedView = (): JSX.Element | undefined => {
+    switch (itemType) {
       case "string":
-        return <AdvancedString itemStateProp={item} />;
+        return <AdvancedString item={item} onUpdate={onUpdate} />;
       case "number":
       case "integer":
-        return <AdvancedNumber itemStateProp={item} />;
+        return <AdvancedNumber item={item} onUpdate={onUpdate} />;
       case "boolean":
-        return <AdvancedBoolean itemStateProp={item} />;
+        return <AdvancedBoolean item={item} onUpdate={onUpdate} />;
       default:
         return <div>No settings to show</div>;
     }
   };
 
-  return <Form>{getAdvancedView(itemState)}</Form>;
+  return <div>{getAdvancedView()}</div>;
 };

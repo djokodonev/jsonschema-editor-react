@@ -56,6 +56,7 @@
     "@emotion/react": "^11.0.0",
     "@emotion/styled": "^11.0.0",
     "@hookstate/core": "^4.0.1",
+    "antd": "^5.28.1",
     "bootstrap": "^5.3.3",
     "framer-motion": "^4.0.0",
     "ramda": "^0.27.1",
@@ -70,7 +71,6 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "storybook": "^8.4.7",
     "@chromatic-com/storybook": "^3.2.2",
     "@storybook/addon-actions": "^8.4.7",
     "@storybook/addon-console": "^1.2.3",
@@ -91,6 +91,7 @@
     "microbundle": "^0.13.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "storybook": "^8.4.7"
   }
 }

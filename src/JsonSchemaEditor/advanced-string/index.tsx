@@ -1,164 +1,152 @@
 import * as React from "react";
-import {
-  AdvancedItemStateProps,
-  JSONSchema7,
-} from "../../JsonSchemaEditor.types";
-import { none, useHookstate } from "@hookstate/core";
+import { JSONSchema7 } from "../../JsonSchemaEditor.types";
 import { StringFormat } from "../utils";
-import { Col, Form, Row } from "react-bootstrap";
+import { Form, Input, InputNumber, Checkbox, Select, Row, Col } from "antd";
 
-export const AdvancedString: React.FunctionComponent<AdvancedItemStateProps> = (
-  props: React.PropsWithChildren<AdvancedItemStateProps>,
+export interface AdvancedStringProps {
+  item: JSONSchema7;
+  onUpdate: (updater: (item: JSONSchema7) => JSONSchema7) => void;
+}
+
+export const AdvancedString: React.FunctionComponent<AdvancedStringProps> = (
+  props: React.PropsWithChildren<AdvancedStringProps>
 ) => {
-  const { itemStateProp } = props;
+  const { item, onUpdate } = props;
 
   const changeEnumOtherValue = (value: string): string[] | null => {
     const array = value.split("\n");
     if (array.length === 0 || (array.length === 1 && !array[0])) {
       return null;
     }
-
     return array;
   };
 
-  const itemState = useHookstate(itemStateProp);
-
-  const isEnumChecked = (itemState.value as JSONSchema7).enum !== undefined;
-  const enumData = (itemState.value as JSONSchema7).enum
-    ? (itemState.enum.value as string[])
-    : [];
-  const enumValue = enumData?.join("\n");
+  const isEnumChecked = item.enum !== undefined;
+  const enumData = item.enum ? (item.enum as string[]) : [];
+  const enumValue = enumData?.join("\n") || "";
 
   return (
-    <Form>
-      <Form.Group as={Row} className="mb-3">
-        <Form.Label column sm={3}>
-          Default:{" "}
-        </Form.Label>
+    <Form layout="vertical">
+      <Form.Item label="Default">
+        <Input
+          placeholder="Default value"
+          value={(item.default as string) || ""}
+          onChange={(e) => {
+            onUpdate((prev) => ({
+              ...prev,
+              default: e.target.value,
+            }));
+          }}
+        />
+      </Form.Item>
 
-        <Col sm={9}>
-          <Form.Control
-            type="text"
-            id="default"
-            placeholder="Default value"
-            value={(itemState.default.value as string) ?? ""}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-              itemState.default.set(evt.target.value);
-            }}
-          />
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item label="Min Length">
+            <InputNumber
+              style={{ width: "100%" }}
+              value={item.minLength}
+              onChange={(val) => {
+                onUpdate((prev) => ({
+                  ...prev,
+                  minLength: val ?? undefined,
+                }));
+              }}
+            />
+          </Form.Item>
         </Col>
-      </Form.Group>
-
-      <Form.Group as={Row} className="mb-3">
-        <Form.Label column sm={3}>
-          Min Length:{" "}
-        </Form.Label>
-
-        <Col sm={3}>
-          <Form.Control
-            type="number"
-            size="sm"
-            defaultValue={Number(itemState.minLength.value)}
-            onChange={(e) => {
-              itemState.minLength.set(Number(e.target.value));
-            }}
-          ></Form.Control>
+        <Col span={12}>
+          <Form.Item label="Max Length">
+            <InputNumber
+              style={{ width: "100%" }}
+              value={item.maxLength}
+              onChange={(val) => {
+                onUpdate((prev) => ({
+                  ...prev,
+                  maxLength: val ?? undefined,
+                }));
+              }}
+            />
+          </Form.Item>
         </Col>
+      </Row>
 
-        <Form.Label column sm={3}>
-          Max Length:{" "}
-        </Form.Label>
+      <Form.Item label="Pattern">
+        <Input
+          placeholder="Must be a valid regular expression."
+          value={item.pattern || ""}
+          onChange={(e) => {
+            onUpdate((prev) => ({
+              ...prev,
+              pattern: e.target.value,
+            }));
+          }}
+        />
+      </Form.Item>
 
-        <Col sm={3}>
-          <Form.Control
-            type="number"
-            size="sm"
-            defaultValue={Number(itemState.maxLength.value)}
-            onChange={(e) => {
-              itemState.maxLength.set(Number(e.target.value));
-            }}
-          ></Form.Control>
-        </Col>
-      </Form.Group>
+      <Form.Item label="Enum">
+        <Row gutter={8}>
+          <Col span={2}>
+            <Checkbox
+              checked={isEnumChecked}
+              onChange={(e) => {
+                onUpdate((prev) => {
+                  if (!e.target.checked) {
+                    // Remove enum when unchecked
+                    const { enum: _, ...rest } = prev;
+                    return rest;
+                  }
+                  // When checked, keep existing enum or leave undefined (don't set empty array)
+                  // Enum will be set when user types values in textarea
+                  return prev;
+                });
+              }}
+            />
+          </Col>
+          <Col span={22}>
+            <Input.TextArea
+              value={enumValue}
+              disabled={!isEnumChecked}
+              placeholder="ENUM Values - One Entry Per Line"
+              rows={4}
+              onChange={(e) => {
+                const update = changeEnumOtherValue(e.target.value);
+                onUpdate((prev) => {
+                  if (update && update.length > 0) {
+                    return {
+                      ...prev,
+                      enum: update,
+                    };
+                  } else {
+                    // Remove enum if empty
+                    const { enum: _, ...rest } = prev;
+                    return rest;
+                  }
+                });
+              }}
+            />
+          </Col>
+        </Row>
+      </Form.Item>
 
-      <Form.Group as={Row} className="mb-3">
-        <Form.Label column sm={3} htmlFor="pattern">
-          Pattern:{" "}
-        </Form.Label>
-        <Col sm={9}>
-          <Form.Control
-            type="text"
-            id="pattern"
-            placeholder="Must be a valid regular expression."
-            value={itemState.pattern.value ?? ""}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-              itemState.pattern.set(evt.target.value);
-            }}
-          />
-        </Col>
-      </Form.Group>
-
-      <Form.Group as={Row} className="mb-3">
-        <Form.Label column sm={2}>
-          Enum:
-        </Form.Label>
-        <Col sm={1}>
-          <Form.Check
-            checked={isEnumChecked}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-              if (!evt.target.checked) {
-                itemState.enum.set(none);
-              } else {
-                itemState.enum.set(Array<string>());
-              }
-            }}
-          />
-        </Col>
-
-        <Col sm={9}>
-          <Form.Control
-            as="textarea"
-            value={enumValue || ""}
-            disabled={!isEnumChecked}
-            placeholder="ENUM Values - One Entry Per Line"
-            onChange={(evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-              const update = changeEnumOtherValue(evt.target.value);
-              if (update === null) {
-                itemState.enum.set(none);
-              } else {
-                itemState.enum.set(update as string[]);
-              }
-            }}
-          />
-        </Col>
-      </Form.Group>
-
-      <Form.Group as={Row} className="mb-3">
-        <Form.Label column sm={3} htmlFor="format">
-          Format:{" "}
-        </Form.Label>
-        <Col sm={9}>
-          <Form.Select
-            value={itemState.format.value ?? ""}
-            size="sm"
-            onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => {
-              if (evt.target.value === "") {
-                itemState.format.set(none);
-              } else {
-                itemState.format.set(evt.target.value);
-              }
-            }}
-          >
-            {StringFormat.map((item, index) => {
-              return (
-                <option key={String(index)} value={item.name}>
-                  {item.name}
-                </option>
-              );
-            })}
-          </Form.Select>
-        </Col>
-      </Form.Group>
+      <Form.Item label="Format">
+        <Select
+          value={item.format || ""}
+          onChange={(val) => {
+            onUpdate((prev) => ({
+              ...prev,
+              format: val || undefined,
+            }));
+          }}
+        >
+          <Select.Option value="">None</Select.Option>
+          {StringFormat.map((item) => (
+            <Select.Option key={item.name} value={item.name}>
+              {item.name}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
     </Form>
   );
 };

@@ -1,117 +1,123 @@
 import * as React from "react";
+import { JSONSchema7 } from "../../JsonSchemaEditor.types";
+import { Form, InputNumber, Checkbox, Input, Row, Col } from "antd";
 
-import {
-  AdvancedItemStateProps,
-  JSONSchema7,
-} from "../../JsonSchemaEditor.types";
-import { none, useHookstate } from "@hookstate/core";
-import { Col, Form, Row } from "react-bootstrap";
+export interface AdvancedNumberProps {
+  item: JSONSchema7;
+  onUpdate: (updater: (item: JSONSchema7) => JSONSchema7) => void;
+}
 
-export const AdvancedNumber: React.FunctionComponent<AdvancedItemStateProps> = (
-  props: React.PropsWithChildren<AdvancedItemStateProps>,
+export const AdvancedNumber: React.FunctionComponent<AdvancedNumberProps> = (
+  props: React.PropsWithChildren<AdvancedNumberProps>
 ) => {
-  const { itemStateProp } = props;
+  const { item, onUpdate } = props;
 
   const changeEnumOtherValue = (value: string): string[] | null => {
     const array = value.split("\n");
     if (array.length === 0 || (array.length === 1 && !array[0])) {
       return null;
     }
-
     return array;
   };
 
-  const itemState = useHookstate(itemStateProp);
-  const isEnumChecked = (itemState.value as JSONSchema7).enum !== undefined;
-  const enumData = (itemState.value as JSONSchema7).enum
-    ? (itemState.enum.value as string[])
-    : [];
-  const enumValue = enumData?.join("\n");
+  const isEnumChecked = item.enum !== undefined;
+  const enumData = item.enum ? (item.enum as number[]) : [];
+  const enumValue = enumData?.map(String).join("\n") || "";
 
   return (
-    <Form>
-      <Form.Group as={Row}>
-        <Form.Label column sm={3}>
-          Default:{" "}
-        </Form.Label>
-        <Col sm={9}>
-          <Form.Control
-            type="number"
-            size="sm"
-            defaultValue={Number(itemState.default.value)}
-            placeholder="Default value"
-            onChange={(e) => {
-              itemState.default.set(Number(e.target.value));
-            }}
-          />
-        </Col>
-      </Form.Group>
+    <Form layout="vertical">
+      <Form.Item label="Default">
+        <InputNumber
+          style={{ width: "100%" }}
+          placeholder="Default value"
+          value={item.default as number | undefined}
+          onChange={(val) => {
+            onUpdate((prev) => ({
+              ...prev,
+              default: val ?? undefined,
+            }));
+          }}
+        />
+      </Form.Item>
 
-      <Form.Group as={Row}>
-        <Form.Label column sm={3}>
-          Min Value:
-        </Form.Label>
-        <Col sm={3}>
-          <Form.Control
-            type="number"
-            size="sm"
-            defaultValue={Number(itemState.minimum.value)}
-            onChange={(e) => {
-              itemState.minimum.set(Number(e.target.value));
-            }}
-          />
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item label="Min Value">
+            <InputNumber
+              style={{ width: "100%" }}
+              value={item.minimum}
+              onChange={(val) => {
+                onUpdate((prev) => ({
+                  ...prev,
+                  minimum: val ?? undefined,
+                }));
+              }}
+            />
+          </Form.Item>
         </Col>
-        <Form.Label column sm={3}>
-          Max Value:
-        </Form.Label>
-        <Col sm={3}>
-          <Form.Control
-            type="number"
-            size="sm"
-            defaultValue={Number(itemState.maximum.value)}
-            onChange={(e) => {
-              itemState.maximum.set(Number(e.target.value));
-            }}
-          />
+        <Col span={12}>
+          <Form.Item label="Max Value">
+            <InputNumber
+              style={{ width: "100%" }}
+              value={item.maximum}
+              onChange={(val) => {
+                onUpdate((prev) => ({
+                  ...prev,
+                  maximum: val ?? undefined,
+                }));
+              }}
+            />
+          </Form.Item>
         </Col>
-      </Form.Group>
+      </Row>
 
-      <Form.Group as={Row}>
-        <Form.Label column sm={2}>
-          Enum:
-        </Form.Label>
-        <Col sm={1}>
-          <Form.Check
-            checked={isEnumChecked}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-              if (!evt.target.checked) {
-                itemState.enum.set(none);
-              } else {
-                itemState.enum.set(Array<string>());
-              }
-            }}
-          />
-        </Col>
-        <Col sm={9}>
-          <Form.Control
-            as="textarea"
-            value={enumValue}
-            disabled={!isEnumChecked}
-            placeholder="ENUM Values - One Entry Per Line"
-            onChange={(evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-              const re = /^[0-9\n]+$/;
-              if (evt.target.value === "" || re.test(evt.target.value)) {
-                const update = changeEnumOtherValue(evt.target.value);
-                if (update === null) {
-                  itemState.enum.set(none);
-                } else {
-                  itemState.enum.set(update as string[]);
+      <Form.Item label="Enum">
+        <Row gutter={8}>
+          <Col span={2}>
+            <Checkbox
+              checked={isEnumChecked}
+              onChange={(e) => {
+                onUpdate((prev) => {
+                  if (!e.target.checked) {
+                    // Remove enum when unchecked
+                    const { enum: _, ...rest } = prev;
+                    return rest;
+                  }
+                  // When checked, keep existing enum or leave undefined (don't set empty array)
+                  // Enum will be set when user types values in textarea
+                  return prev;
+                });
+              }}
+            />
+          </Col>
+          <Col span={22}>
+            <Input.TextArea
+              value={enumValue}
+              disabled={!isEnumChecked}
+              placeholder="ENUM Values - One Entry Per Line (numbers only)"
+              rows={4}
+              onChange={(e) => {
+                const re = /^[0-9\n]+$/;
+                if (e.target.value === "" || re.test(e.target.value)) {
+                  const update = changeEnumOtherValue(e.target.value);
+                  onUpdate((prev) => {
+                    if (update && update.length > 0) {
+                      return {
+                        ...prev,
+                        enum: update.map(Number),
+                      };
+                    } else {
+                      // Remove enum if empty
+                      const { enum: _, ...rest } = prev;
+                      return rest;
+                    }
+                  });
                 }
-              }
-            }}
-          />
-        </Col>
-      </Form.Group>
+              }}
+            />
+          </Col>
+        </Row>
+      </Form.Item>
     </Form>
   );
 };
