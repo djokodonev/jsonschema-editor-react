@@ -1,4 +1,3 @@
-import { State } from "@hookstate/core";
 export interface SchemaEditorProps {
     /**
      * Text component
@@ -14,9 +13,6 @@ export type Schema2 = {
     isReadOnly: boolean;
     fieldId: number;
 };
-export interface AdvancedItemStateProps {
-    itemStateProp: State<JSONSchema7>;
-}
 /**
  * Primitive type
  * @see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01#section-6.1.1
@@ -36,17 +32,17 @@ export interface JSONSchema7Array extends Array<JSONSchema7Type> {
  * Meta schema
  *
  * Recommended values:
- * - 'http://json-schema.org/schema#'
- * - 'http://json-schema.org/hyper-schema#'
+ * - 'https://json-schema.org/draft/2020-12/schema'
+ * - 'https://json-schema.org/draft/2020-12/hyper-schema'
+ * - 'https://json-schema.org/draft/2019-09/schema'
  * - 'http://json-schema.org/draft-07/schema#'
- * - 'http://json-schema.org/draft-07/hyper-schema#'
  *
- * @see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01#section-5
+ * @see https://json-schema.org/draft/2020-12/schema
  */
 export type JSONSchema7Version = string;
 /**
- * JSON Schema v7
- * @see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01
+ * JSON Schema (Draft 2020-12 compatible, using JSONSchema7 type name for backward compatibility)
+ * @see https://json-schema.org/draft/2020-12/schema
  */
 export type JSONSchema7Definition = JSONSchema7 | boolean;
 export interface JSONSchema7 {

@@ -1,10 +1,10 @@
 import * as React from "react";
-import { FlexProps } from "../utils";
-import { State } from "@hookstate/core";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
-export interface DropPlusProps extends FlexProps {
-    itemStateProp: State<JSONSchema7>;
-    parentStateProp: State<JSONSchema7>;
+export interface DropPlusProps {
+    item: JSONSchema7;
+    parentSchema: JSONSchema7;
     isDisabled: boolean;
+    onAddSibling: () => void;
+    onAddChild: () => void;
 }
 export declare const DropPlus: React.FunctionComponent<DropPlusProps>;

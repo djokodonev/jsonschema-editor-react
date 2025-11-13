@@ -1,13 +1,17 @@
 import * as React from "react";
-import { State } from "@hookstate/core";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
-import { FlexProps } from "../utils";
-export interface SchemaItemProps extends FlexProps {
-    required: string[];
-    itemStateProp: State<JSONSchema7>;
-    parentStateProp: State<JSONSchema7>;
+export interface SchemaItemProps {
+    item: JSONSchema7;
     name: string;
-    isReadOnly: State<boolean>;
-    showadvanced: (item: string) => void;
+    parentSchema: JSONSchema7;
+    required: string[];
+    isReadOnly: boolean;
+    onUpdate: (name: string, item: JSONSchema7) => void;
+    onRename: (oldName: string, newName: string) => void;
+    onDelete: (name: string) => void;
+    onAddSibling: () => void;
+    onAddChild?: (name: string) => void;
+    onToggleRequired: (name: string, isRequired: boolean) => void;
+    showAdvanced: (name: string) => void;
 }
 export declare const SchemaItem: React.FunctionComponent<SchemaItemProps>;

@@ -1,13 +1,10 @@
 /// <reference types="ts-toolbelt" />
 import { JSONSchema7, JSONSchema7TypeName } from "../JsonSchemaEditor.types";
-import { Immutable } from "@hookstate/core";
 export declare const JSONPATH_JOIN_CHAR = ".";
 export declare enum PropertyType {
     SIBLING = 0,
     CHILD = 1
 }
-export declare function useDebounce<T>(value: T, delay?: number): Immutable<T>;
-export default useDebounce;
 export declare const StringFormat: {
     name: string;
 }[];

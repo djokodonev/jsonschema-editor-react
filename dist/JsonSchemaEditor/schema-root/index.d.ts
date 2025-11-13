@@ -1,10 +1,10 @@
 import * as React from "react";
-import { State } from "@hookstate/core";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
-import { FlexProps } from "../utils";
-export interface SchemaArrayProps extends FlexProps {
-    schemaState: State<JSONSchema7>;
+export interface SchemaRootProps {
+    schema: JSONSchema7;
     onSchemaChange?: (results: string) => void;
-    isReadOnly: State<boolean>;
+    isReadOnly: boolean;
+    updateSchema: (updater: (schema: JSONSchema7) => JSONSchema7) => void;
+    onPreview?: () => void;
 }
-export declare const SchemaRoot: React.FunctionComponent<SchemaArrayProps>;
+export declare const SchemaRoot: React.FunctionComponent<SchemaRootProps>;
