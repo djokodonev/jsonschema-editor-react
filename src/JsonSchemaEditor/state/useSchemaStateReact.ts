@@ -17,8 +17,13 @@ export const defaultSchema = (): JSONSchema7 => {
 };
 
 const isValidSchema = (schema: JSONSchema7): boolean => {
-  const isValid = ajv.validateSchema(schema);
-  return isValid;
+  try {
+    const isValid = ajv.validateSchema(schema);
+    // validateSchema returns boolean synchronously for Ajv2020
+    return typeof isValid === "boolean" ? isValid : false;
+  } catch {
+    return false;
+  }
 };
 
 export interface UseSchemaStateReturn {
