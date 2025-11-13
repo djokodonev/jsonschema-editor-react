@@ -1,6 +1,4 @@
 import { JSONSchema7, JSONSchema7TypeName } from "../JsonSchemaEditor.types";
-import * as React from "react";
-import { Immutable, useHookstate } from "@hookstate/core";
 import * as R from "ramda";
 
 const schemaDraft = "https://json-schema.org/draft/2020-12/schema";
@@ -11,23 +9,6 @@ export enum PropertyType {
   SIBLING,
   CHILD,
 }
-
-export function useDebounce<T>(value: T, delay?: number): Immutable<T> {
-  const debouncedValue = useHookstate<T>(value);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => debouncedValue.set(value), delay || 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, delay]);
-
-  return debouncedValue.value;
-}
-
-export default useDebounce;
 
 export const StringFormat = [
   { name: "date-time" },
