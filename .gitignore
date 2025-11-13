@@ -60,3 +60,13 @@ storybook-static
 .cache
 
 yarn-error.log
+/.idea/codeStyles/codeStyleConfig.xml
+/.idea/codeStyles/Project.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/copilot.data.migration.agent.xml
+/.idea/jsonschema-editor-react.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
