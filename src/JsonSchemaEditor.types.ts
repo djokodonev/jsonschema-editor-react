@@ -21,9 +21,9 @@ export interface AdvancedItemStateProps {
 }
 
 //==================================================================================================
-// JSON Schema Draft 07
+// JSON Schema Draft 2020-12
 //==================================================================================================
-// https://tools.ietf.org/html/draft-handrews-json-schema-validation-01
+// https://json-schema.org/draft/2020-12/schema
 //--------------------------------------------------------------------------------------------------
 
 /**
@@ -64,18 +64,18 @@ export interface JSONSchema7Array extends Array<JSONSchema7Type> {}
  * Meta schema
  *
  * Recommended values:
- * - 'http://json-schema.org/schema#'
- * - 'http://json-schema.org/hyper-schema#'
+ * - 'https://json-schema.org/draft/2020-12/schema'
+ * - 'https://json-schema.org/draft/2020-12/hyper-schema'
+ * - 'https://json-schema.org/draft/2019-09/schema'
  * - 'http://json-schema.org/draft-07/schema#'
- * - 'http://json-schema.org/draft-07/hyper-schema#'
  *
- * @see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01#section-5
+ * @see https://json-schema.org/draft/2020-12/schema
  */
 export type JSONSchema7Version = string;
 
 /**
- * JSON Schema v7
- * @see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01
+ * JSON Schema (Draft 2020-12 compatible, using JSONSchema7 type name for backward compatibility)
+ * @see https://json-schema.org/draft/2020-12/schema
  */
 export type JSONSchema7Definition = JSONSchema7 | boolean;
 export interface JSONSchema7 {

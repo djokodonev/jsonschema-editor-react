@@ -6,7 +6,7 @@ export const bad = {
 };
 
 export const readOnlyData: JSONSchema7 = {
-  $schema: "http://json-schema.org/draft-07/schema",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
   $id: "#/io/knack/avro/item",
   type: "object",
   title: "Item",

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
-import Ajv from "ajv";
+import Ajv2020 from "ajv/dist/2020";
 
-const ajv = new Ajv();
+const ajv = new Ajv2020();
 
 export const defaultSchema = (): JSONSchema7 => {
   return {
-    $schema: "http://json-schema.org/draft-07/schema#",
+    $schema: "https://json-schema.org/draft/2020-12/schema",
     type: "object",
     title: "title",
     description: "",

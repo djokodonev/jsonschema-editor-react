@@ -3,7 +3,7 @@ import * as React from "react";
 import { Immutable, useHookstate } from "@hookstate/core";
 import * as R from "ramda";
 
-const schemaDraft = "http://json-schema.org/draft-07/schema#";
+const schemaDraft = "https://json-schema.org/draft/2020-12/schema";
 
 export const JSONPATH_JOIN_CHAR = ".";
 

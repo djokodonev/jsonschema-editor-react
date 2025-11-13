@@ -1,7 +1,7 @@
 # JSON Schema Editor React
 
 <p align="center">
-  A React component for visually editing JSON Schema Draft 07
+  A React component for visually editing JSON Schema Draft 2020-12 (OpenAPI 3.1/FastAPI compatible)
 </p>
 
 <p align="center">
@@ -42,7 +42,7 @@ This project has been significantly refactored to use modern React patterns and 
 
 > JSON Schema is hypermedia ready, and ideal for annotating your existing JSON-based HTTP API. JSON Schema documents are identified by URIs, which can be used in HTTP Link headers, and inside JSON Schema documents to allow recursive definitions. - [json-schema.org](https://json-schema.org/)
 
-JsonSchemaEditor is a React component library that allows the easy generation of valid `Draft 07` JsonSchema from a UI, so that it can be easily persisted in a schema management system.
+JsonSchemaEditor is a React component library that allows the easy generation of valid **Draft 2020-12** JsonSchema from a UI, so that it can be easily persisted in a schema management system. This version is compatible with OpenAPI 3.1 and FastAPI.
 
 Benefits include:
 
@@ -130,7 +130,7 @@ import React from "react";
 import JsonSchemaEditor from "@djokodonev/json-schema-editor";
 
 const initialSchema = {
-  $schema: "http://json-schema.org/draft-07/schema#",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
   type: "object",
   title: "My Schema",
   description: "A sample schema",
@@ -185,7 +185,7 @@ The example JSON generator creates realistic examples based on:
 
 ## Features
 
-- ✅ Visual JSON Schema editor for Draft 07
+- ✅ Visual JSON Schema editor for Draft 2020-12 (compatible with OpenAPI 3.1/FastAPI)
 - ✅ Support for all JSON Schema types: string, number, integer, boolean, object, array
 - ✅ Add/remove properties and nested objects
 - ✅ Advanced settings for each type:
@@ -245,9 +245,9 @@ npm run build
 ### Runtime Dependencies
 
 - `antd`: ^5.28.1 - UI component library
+- `ajv`: ^8.12.0 - JSON Schema validator (Draft 2020-12)
 - `ramda`: ^0.27.1 - Functional utilities
 - `use-debounce`: ^6.0.1 - Debounce hook for input handling
-- `ajv`: Used for schema validation (via dev dependencies)
 
 ### Peer Dependencies
 

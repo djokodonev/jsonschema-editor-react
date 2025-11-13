@@ -1,12 +1,12 @@
 import { hookstate, State } from "@hookstate/core";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
-import Ajv from "ajv";
+import Ajv2020 from "ajv/dist/2020";
 import { Schema2 } from "../../JsonSchemaEditor.types";
-const ajv = new Ajv();
+const ajv = new Ajv2020();
 
 export const defaultSchema = (): JSONSchema7 => {
   return {
-    $schema: "http://json-schema.org/draft-07/schema#",
+    $schema: "https://json-schema.org/draft/2020-12/schema",
     type: "object",
     title: "title",
     description: "",
