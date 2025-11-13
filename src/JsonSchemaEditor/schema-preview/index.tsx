@@ -1,7 +1,7 @@
 import * as React from "react";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
 import { Modal, Tabs, Button } from "antd";
-import { EyeOutlined, CopyOutlined, CheckOutlined } from "@ant-design/icons";
+import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 import { generateExample } from "../utils/exampleGenerator";
 
 export interface SchemaPreviewProps {

@@ -1,5 +1,6 @@
 import { hookstate, State } from "@hookstate/core";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
+// @ts-ignore - Ajv2020 is a default export from the dist file
 import Ajv2020 from "ajv/dist/2020";
 import { Schema2 } from "../../JsonSchemaEditor.types";
 const ajv = new Ajv2020();

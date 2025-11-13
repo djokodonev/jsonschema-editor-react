@@ -21,6 +21,7 @@ export function useDebounce<T>(value: T, delay?: number): Immutable<T> {
     return () => {
       clearTimeout(timer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, delay]);
 
   return debouncedValue.value;

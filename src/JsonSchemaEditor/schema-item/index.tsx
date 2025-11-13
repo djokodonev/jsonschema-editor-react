@@ -1,13 +1,8 @@
 import * as React from "react";
 import { JSONSchema7, JSONSchema7TypeName } from "../../JsonSchemaEditor.types";
 import {
-  getDefaultSchema,
-  DataType,
   SchemaTypes,
-  random,
   handleTypeChange as handleTypeChangeUtil,
-  renameKeys,
-  deleteKey,
 } from "../utils";
 import { useDebouncedCallback } from "use-debounce";
 import { SchemaObject } from "../schema-object";

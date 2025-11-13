@@ -1,6 +1,5 @@
 import * as React from "react";
-import { JSONSchema7, JSONSchema7TypeName } from "../../JsonSchemaEditor.types";
-import { IoIosAddCircleOutline } from "react-icons/io";
+import { JSONSchema7 } from "../../JsonSchemaEditor.types";
 import { getDefaultSchema, DataType, random } from "../utils";
 import { Input, Select, Tooltip, Button, Checkbox } from "antd";
 import { PlusOutlined, EyeOutlined } from "@ant-design/icons";

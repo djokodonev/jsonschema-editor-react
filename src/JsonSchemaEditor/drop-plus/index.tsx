@@ -1,7 +1,5 @@
 import * as React from "react";
-import { DataType, getDefaultSchema } from "../utils";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
-import { random } from "../utils";
 import { Button, Popover, Space } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
@@ -16,7 +14,7 @@ export interface DropPlusProps {
 export const DropPlus: React.FunctionComponent<DropPlusProps> = (
   props: React.PropsWithChildren<DropPlusProps>
 ) => {
-  const { item, parentSchema, isDisabled, onAddSibling, onAddChild } = props;
+  const { isDisabled, onAddSibling, onAddChild } = props;
   const [open, setOpen] = React.useState(false);
 
   if (isDisabled) {
