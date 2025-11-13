@@ -1,195 +1,240 @@
 import * as React from "react";
-import { useHookstate, State } from "@hookstate/core";
 import { JSONSchema7, JSONSchema7TypeName } from "../../JsonSchemaEditor.types";
-import { FiSettings } from "react-icons/fi";
-import { IoIosAddCircleOutline } from "react-icons/io";
 import {
   SchemaTypes,
   getDefaultSchema,
   DataType,
-  handleTypeChange,
-  random,
-  FlexProps,
-  ITEM_COL_CLASSNAME,
+  handleTypeChange as handleTypeChangeUtil,
 } from "../utils";
-
 import { SchemaObject } from "../schema-object";
 import { AdvancedSettings } from "../schema-advanced";
-import Modal from "react-bootstrap/Modal";
-import { Button, Col, Form, Row } from "react-bootstrap";
-import { TooltipWrapper } from "../TooltipWrapper";
-import { IconButton } from "../IconButton";
+import { Modal, Input, Select, Tooltip, Button } from "antd";
+import { SettingOutlined, PlusOutlined } from "@ant-design/icons";
 
-export interface SchemaArrayProps extends FlexProps {
-  schemaState: State<JSONSchema7>;
-  isReadOnly: State<boolean>;
+export interface SchemaArrayProps {
+  schema: JSONSchema7;
+  isReadOnly: boolean;
+  updateSchema: (updater: (schema: JSONSchema7) => JSONSchema7) => void;
 }
 
 export const SchemaArray: React.FunctionComponent<SchemaArrayProps> = (
-  props: React.PropsWithChildren<SchemaArrayProps>,
+  props: React.PropsWithChildren<SchemaArrayProps>
 ) => {
-  const { schemaState, isReadOnly } = props;
-  const state = useHookstate(schemaState.items as JSONSchema7);
-  const isReadOnlyState = useHookstate(isReadOnly);
+  const { schema, isReadOnly, updateSchema } = props;
+  const [advancedOpen, setAdvancedOpen] = React.useState(false);
 
-  const onCloseAdvanced = (): void => {
-    localState.isAdvancedOpen.set(false);
+  const items = schema.items
+    ? Array.isArray(schema.items)
+      ? schema.items[0]
+      : schema.items
+    : null;
+
+  const itemsSchema = items as JSONSchema7 | null;
+
+  const handleTypeChange = (newType: JSONSchema7TypeName) => {
+    const newSchema = handleTypeChangeUtil(newType, false);
+    updateSchema((prev) => ({
+      ...prev,
+      items: newSchema as JSONSchema7,
+    }));
   };
 
-  const showadvanced = (): void => {
-    localState.isAdvancedOpen.set(true);
+  const handleTitleChange = (value: string) => {
+    if (itemsSchema) {
+      updateSchema((prev) => ({
+        ...prev,
+        items: {
+          ...itemsSchema,
+          title: value,
+        },
+      }));
+    }
   };
 
-  const localState = useHookstate({
-    isAdvancedOpen: false,
-  });
+  const handleDescriptionChange = (value: string) => {
+    if (itemsSchema) {
+      updateSchema((prev) => ({
+        ...prev,
+        items: {
+          ...itemsSchema,
+          description: value,
+        },
+      }));
+    }
+  };
+
+  const handleAddProperty = () => {
+    // Add a property to the object items schema
+    if (
+      itemsSchema &&
+      !Array.isArray(itemsSchema.type) &&
+      itemsSchema.type === "object"
+    ) {
+      const fieldName = `field_${Math.random().toString(36).substring(2, 6)}`;
+      updateSchema((prev) => {
+        const currentItems = prev.items as JSONSchema7;
+        if (!currentItems) {
+          return prev;
+        }
+        return {
+          ...prev,
+          items: {
+            ...currentItems,
+            type: "object",
+            properties: {
+              ...(currentItems.properties || {}),
+              [fieldName]: getDefaultSchema(DataType.string),
+            },
+          },
+        };
+      });
+    }
+  };
+
+  const showAdvanced = () => {
+    setAdvancedOpen(true);
+  };
+
+  const onCloseAdvanced = () => {
+    setAdvancedOpen(false);
+  };
+
+  if (!itemsSchema) {
+    return null;
+  }
 
   return (
-    <>
-      <Form>
-        <Row className="m-0 p-0" style={{ height: "100%" }}>
-          {/* Vertical line on left margin */}
-          <div className={"m-0 p-0 col-auto"}>
-            <div className={"vr ms-1 pb-4"} style={{ height: "100%" }} />
-          </div>
+    <div style={{ marginLeft: 24, marginTop: 8 }}>
+      <div
+        style={{
+          backgroundColor: "#fff",
+          border: "1px solid #d9d9d9",
+          borderRadius: "6px",
+          padding: "12px",
+          marginBottom: "12px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            alignItems: "center",
+            marginBottom: 8,
+          }}
+        >
+          <Input
+            disabled
+            value="Items"
+            size="small"
+            style={{ width: "120px", fontWeight: 600 }}
+          />
+          <Select
+            disabled={isReadOnly}
+            value={
+              (Array.isArray(itemsSchema.type)
+                ? itemsSchema.type[0]
+                : itemsSchema.type) || undefined
+            }
+            size="small"
+            onChange={handleTypeChange}
+            style={{ width: "120px" }}
+          >
+            {SchemaTypes.map((type) => (
+              <Select.Option key={type} value={type}>
+                {type}
+              </Select.Option>
+            ))}
+          </Select>
+          <Input
+            value={itemsSchema.title || ""}
+            disabled={isReadOnly}
+            placeholder="Title"
+            size="small"
+            onChange={(e) => handleTitleChange(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          <Input
+            value={itemsSchema.description || ""}
+            disabled={isReadOnly}
+            placeholder="Description"
+            size="small"
+            onChange={(e) => handleDescriptionChange(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          {!Array.isArray(itemsSchema.type) &&
+            itemsSchema.type !== "object" &&
+            itemsSchema.type !== "array" && (
+              <Tooltip title="Advanced Settings">
+                <Button
+                  disabled={isReadOnly}
+                  type="text"
+                  icon={<SettingOutlined />}
+                  onClick={showAdvanced}
+                  size="small"
+                />
+              </Tooltip>
+            )}
+          {!Array.isArray(itemsSchema.type) &&
+            itemsSchema.type === "object" && (
+              <Tooltip title="Add Property">
+                <Button
+                  disabled={isReadOnly}
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={handleAddProperty}
+                  size="small"
+                />
+              </Tooltip>
+            )}
+        </div>
+      </div>
 
-          <Col className={"p-0 my-0 ms-2"}>
-            <Form className="schema-item">
-              <Row className="align-items-center">
-                <Col xs={"auto"} className={ITEM_COL_CLASSNAME}>
-                  <Form.Control
-                    type="text"
-                    key="Items"
-                    disabled
-                    value="Items"
-                    size="sm"
-                  />
-                </Col>
-                <Col xs={"auto"} className={ITEM_COL_CLASSNAME}>
-                  <Form.Check disabled />
-                </Col>
-                <Col xs={"auto"} className={ITEM_COL_CLASSNAME}>
-                  <Form.Select
-                    disabled={isReadOnlyState.value}
-                    value={state.type.value as JSONSchema7TypeName}
-                    size="sm"
-                    onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => {
-                      const newSchema = handleTypeChange(
-                        evt.target.value as JSONSchema7TypeName,
-                        false,
-                      );
-                      state.set(newSchema as JSONSchema7);
-                    }}
-                  >
-                    {SchemaTypes.map((item, index) => {
-                      return (
-                        <option key={String(index)} value={item}>
-                          {item}
-                        </option>
-                      );
-                    })}
-                  </Form.Select>
-                </Col>
-                <Col xs={"auto"} className={ITEM_COL_CLASSNAME}>
-                  <Form.Control
-                    value={state.title.value}
-                    disabled={isReadOnlyState.value}
-                    size="sm"
-                    placeholder="Add Title"
-                    onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-                      state.title.set(evt.target.value);
-                    }}
-                  />
-                </Col>
-                <Col className={ITEM_COL_CLASSNAME}>
-                  <Form.Control
-                    value={state.description.value}
-                    disabled={isReadOnlyState.value}
-                    size="sm"
-                    placeholder="Add Description"
-                    onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-                      state.description.set(evt.target.value);
-                    }}
-                  />
-                </Col>
-
-                {state.type.value !== "object" && (
-                  <Col xs={"auto"} className={ITEM_COL_CLASSNAME}>
-                    <TooltipWrapper
-                      aria-label="Advanced Settings"
-                      placement="top"
-                      label="Advanced Settings"
-                    >
-                      <IconButton
-                        isDisabled={isReadOnlyState.value}
-                        size="sm"
-                        variant="link"
-                        colorScheme="blue"
-                        icon={<FiSettings />}
-                        aria-label="Advanced Settings"
-                        onClick={() => {
-                          showadvanced();
-                        }}
-                      />
-                    </TooltipWrapper>
-                  </Col>
-                )}
-
-                {state.type.value === "object" && (
-                  <Col xs={"auto"} className={ITEM_COL_CLASSNAME}>
-                    <TooltipWrapper
-                      hasArrow
-                      aria-label="Add Child Node"
-                      label="Add Child Node"
-                      placement="top"
-                    >
-                      <IconButton
-                        isRound
-                        isDisabled={isReadOnlyState.value}
-                        size="sm"
-                        variant="link"
-                        colorScheme="green"
-                        fontSize="16px"
-                        icon={<IoIosAddCircleOutline />}
-                        aria-label="Add Child Node"
-                        onClick={() => {
-                          const fieldName = `field_${random()}`;
-                          (
-                            state.properties as State<{
-                              [key: string]: JSONSchema7;
-                            }>
-                          )[fieldName].set(getDefaultSchema(DataType.string));
-                        }}
-                      />
-                    </TooltipWrapper>
-                  </Col>
-                )}
-              </Row>
-            </Form>
-          </Col>
-        </Row>
-      </Form>
-      {state.type?.value === "object" && (
-        <SchemaObject isReadOnly={isReadOnlyState} schemaState={state} />
-      )}
-      {state.type?.value === "array" && (
-        <SchemaArray isReadOnly={isReadOnlyState} schemaState={state} />
+      {!Array.isArray(itemsSchema.type) && itemsSchema.type === "object" && (
+        <SchemaObject
+          schema={itemsSchema}
+          isReadOnly={isReadOnly}
+          updateSchema={(updater) => {
+            const updated = updater(itemsSchema);
+            updateSchema((prev) => ({
+              ...prev,
+              items: updated,
+            }));
+          }}
+        />
       )}
 
-      <Modal show={localState.isAdvancedOpen.get()} onHide={onCloseAdvanced}>
-        <Modal />
-        <Modal.Header>Advanced Array Schema Settings</Modal.Header>
+      {!Array.isArray(itemsSchema.type) && itemsSchema.type === "array" && (
+        <SchemaArray
+          schema={itemsSchema}
+          isReadOnly={isReadOnly}
+          updateSchema={(updater) => {
+            const updated = updater(itemsSchema);
+            updateSchema((prev) => ({
+              ...prev,
+              items: updated,
+            }));
+          }}
+        />
+      )}
 
-        <Modal.Body>
-          <AdvancedSettings itemStateProp={state} />
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="primary" className="m-2" onClick={onCloseAdvanced}>
-            Close
-          </Button>
-        </Modal.Footer>
+      <Modal
+        open={advancedOpen}
+        onCancel={onCloseAdvanced}
+        footer={null}
+        title="Advanced Array Schema Settings"
+      >
+        <AdvancedSettings
+          item={itemsSchema}
+          onUpdate={(updater) => {
+            const updated = updater(itemsSchema);
+            updateSchema((prev) => ({
+              ...prev,
+              items: updated,
+            }));
+          }}
+        />
       </Modal>
-    </>
+    </div>
   );
 };
