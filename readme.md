@@ -167,6 +167,22 @@ export default App;
 />
 ```
 
+### Schema Preview
+
+The editor includes a built-in preview feature that shows both the generated JSON Schema and example JSON data:
+
+- Click the **"Preview"** button in the root schema row
+- View the JSON Schema in a formatted, copyable format
+- View example JSON data that validates against your schema
+- Copy either the schema or example JSON to your clipboard
+
+The example JSON generator creates realistic examples based on:
+- Enum values (uses first enum value if available)
+- Default values
+- Type-specific defaults (dates, emails, URIs, etc.)
+- Required properties (always included)
+- Optional properties (randomly included)
+
 ## Features
 
 - ✅ Visual JSON Schema editor for Draft 07
@@ -178,6 +194,8 @@ export default App;
   - **Boolean**: Default, Enum
 - ✅ Required field management
 - ✅ Real-time schema validation
+- ✅ **Schema Preview**: View generated JSON Schema and example JSON data
+- ✅ **Example JSON Generator**: Automatically generates example JSON that validates against your schema
 - ✅ Type-safe with TypeScript
 - ✅ Modern React 18 patterns
 - ✅ Ant Design UI components
