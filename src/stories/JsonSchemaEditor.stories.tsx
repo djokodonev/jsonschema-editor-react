@@ -1,4 +1,5 @@
 import { StoryObj, Meta } from "@storybook/react";
+import { fn } from "@storybook/test";
 import JsonSchemaEditor from "..";
 import { readOnlyData, printIt } from "./helper";
 
@@ -9,13 +10,17 @@ export default {
 
 type Story = StoryObj<typeof JsonSchemaEditor>;
 
-export const NewJsonSchema: Story = {};
+export const NewJsonSchema: Story = {
+  args: {
+    onSchemaChange: fn(),
+  },
+};
 
 export const WithData: Story = {
   args: {
     data: readOnlyData,
-    onSchemaChange: (r) => {
+    onSchemaChange: fn((r) => {
       printIt(r);
-    },
+    }),
   },
 };
