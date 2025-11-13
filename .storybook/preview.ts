@@ -1,6 +1,7 @@
 import type { Preview } from "@storybook/react";
 import { ConfigProvider } from "antd";
 import React from "react";
+import "@storybook/addon-console";
 
 const preview: Preview = {
   parameters: {
@@ -19,6 +20,7 @@ const preview: Preview = {
       </ConfigProvider>
     ),
   ],
+  tags: ["autodocs", "autodocs"],
 };
 
 export default preview;
