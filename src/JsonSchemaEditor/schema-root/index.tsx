@@ -3,19 +3,20 @@ import { JSONSchema7, JSONSchema7TypeName } from "../../JsonSchemaEditor.types";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { getDefaultSchema, DataType, random } from "../utils";
 import { Input, Select, Tooltip, Button, Checkbox } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, EyeOutlined } from "@ant-design/icons";
 
 export interface SchemaRootProps {
   schema: JSONSchema7;
   onSchemaChange?: (results: string) => void;
   isReadOnly: boolean;
   updateSchema: (updater: (schema: JSONSchema7) => JSONSchema7) => void;
+  onPreview?: () => void;
 }
 
 export const SchemaRoot: React.FunctionComponent<SchemaRootProps> = (
   props: React.PropsWithChildren<SchemaRootProps>
 ) => {
-  const { schema, isReadOnly, updateSchema } = props;
+  const { schema, isReadOnly, updateSchema, onPreview } = props;
 
   const handleTitleChange = (value: string) => {
     updateSchema((prev) => ({
@@ -99,6 +100,18 @@ export const SchemaRoot: React.FunctionComponent<SchemaRootProps> = (
                 onClick={handleAddChild}
                 size="small"
               />
+            </Tooltip>
+          )}
+          {onPreview && (
+            <Tooltip title="Preview Schema & Example JSON">
+              <Button
+                type="default"
+                icon={<EyeOutlined />}
+                onClick={onPreview}
+                size="small"
+              >
+                Preview
+              </Button>
             </Tooltip>
           )}
         </div>

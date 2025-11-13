@@ -9,11 +9,13 @@ import { SchemaRoot } from "./schema-root";
 import { Whoops } from "./whoops";
 import { SchemaObject } from "./schema-object";
 import { SchemaArray } from "./schema-array";
+import { SchemaPreview } from "./schema-preview";
 
 export * from "../JsonSchemaEditor.types";
 
 export const JsonSchemaEditor = (props: SchemaEditorProps) => {
   const { onSchemaChange, readOnly, data } = props;
+  const [previewOpen, setPreviewOpen] = React.useState(false);
 
   const schemaState = useSchemaStateReact(
     data ?? defaultSchema(),
@@ -33,12 +35,19 @@ export const JsonSchemaEditor = (props: SchemaEditorProps) => {
 
   return (
     <ConfigProvider>
-      <div style={{ padding: "16px", backgroundColor: "#fafafa", minHeight: "100vh" }}>
+      <div
+        style={{
+          padding: "16px",
+          backgroundColor: "#fafafa",
+          minHeight: "100vh",
+        }}
+      >
         <SchemaRoot
           onSchemaChange={onSchemaChange}
           schema={schemaState.jsonSchema}
           isReadOnly={schemaState.isReadOnly}
           updateSchema={schemaState.updateSchema}
+          onPreview={() => setPreviewOpen(true)}
         />
 
         {!Array.isArray(schemaState.jsonSchema.type) &&
@@ -68,6 +77,12 @@ export const JsonSchemaEditor = (props: SchemaEditorProps) => {
               }}
             />
           )}
+
+        <SchemaPreview
+          schema={schemaState.jsonSchema}
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+        />
       </div>
     </ConfigProvider>
   );
