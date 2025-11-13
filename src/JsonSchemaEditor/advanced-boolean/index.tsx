@@ -1,5 +1,5 @@
 import * as React from "react";
-	import { JSONSchema7 } from "../../JsonSchemaEditor.types";
+import { JSONSchema7 } from "../../JsonSchemaEditor.types";
 import { Form, Select, Checkbox, Input, Row, Col } from "antd";
 
 export interface AdvancedBooleanProps {
