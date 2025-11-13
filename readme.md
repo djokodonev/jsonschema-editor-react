@@ -63,13 +63,13 @@ Benefits include:
 ### Install Package
 
 ```shell
-npm install @scottwday/json-schema-editor
+npm install @djokodonev/json-schema-editor
 ```
 
 or
 
 ```shell
-yarn add @scottwday/json-schema-editor
+yarn add @djokodonev/json-schema-editor
 ```
 
 ### Install Peer Dependencies
@@ -102,7 +102,7 @@ yarn add react react-dom antd
 
 ```jsx
 import React from "react";
-import JsonSchemaEditor from "@scottwday/json-schema-editor";
+import JsonSchemaEditor from "@djokodonev/json-schema-editor";
 
 function App() {
   const handleSchemaChange = (schemaString) => {
@@ -127,7 +127,7 @@ export default App;
 
 ```jsx
 import React from "react";
-import JsonSchemaEditor from "@scottwday/json-schema-editor";
+import JsonSchemaEditor from "@djokodonev/json-schema-editor";
 
 const initialSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
