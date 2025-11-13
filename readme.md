@@ -113,8 +113,8 @@ function App() {
 
   return (
     <div className="App">
-      <JsonSchemaEditor 
-        onSchemaChange={handleSchemaChange} 
+      <JsonSchemaEditor
+        onSchemaChange={handleSchemaChange}
       />
     </div>
   );
@@ -146,9 +146,9 @@ const initialSchema = {
 function App() {
   return (
     <div className="App">
-      <JsonSchemaEditor 
+      <JsonSchemaEditor
         data={initialSchema}
-        onSchemaChange={(schema) => console.log(schema)} 
+        onSchemaChange={(schema) => console.log(schema)}
       />
     </div>
   );
@@ -160,10 +160,10 @@ export default App;
 ### Read-Only Mode
 
 ```jsx
-<JsonSchemaEditor 
+<JsonSchemaEditor
   data={mySchema}
   readOnly={true}
-  onSchemaChange={handleSchemaChange} 
+  onSchemaChange={handleSchemaChange}
 />
 ```
 
@@ -253,7 +253,7 @@ If you're upgrading from a version that used Hookstate and react-bootstrap:
 
 ## License
 
-json-schema-editor-react is Copyright © 2021-2024. It is free software and may be redistributed under the Apache 2.0 license.
+json-schema-editor-react is Copyright © 2021-2025. It is free software and may be redistributed under the Apache 2.0 license.
 
 ## Contributing
 
