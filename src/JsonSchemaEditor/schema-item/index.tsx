@@ -105,7 +105,7 @@ export const SchemaItem: React.FunctionComponent<SchemaItemProps> = (
   }
 
   return (
-    <Form>
+    <div>
       <Row className="m-0 p-0" style={{ height: "100%" }}>
         <Toast
           onClose={() =>
@@ -308,6 +308,6 @@ export const SchemaItem: React.FunctionComponent<SchemaItemProps> = (
           )}
         </Col>
       </Row>
-    </Form>
+    </div>
   );
 };

@@ -30,7 +30,7 @@ export const SchemaRoot: React.FunctionComponent<SchemaArrayProps> = (
     <>
       {props.onSchemaChange &&
         props.onSchemaChange(JSON.stringify(state.value))}
-      <Form data-testid="jsonschema-editor">
+      <div data-testid="jsonschema-editor">
         <Row className="align-items-center">
           <Col xs={"auto"} className={ITEM_COL_CLASSNAME}>
             <Form.Control type="text" disabled placeholder="root" size="sm" />
@@ -119,7 +119,7 @@ export const SchemaRoot: React.FunctionComponent<SchemaArrayProps> = (
             </Col>
           )}
         </Row>
-      </Form>
+      </div>
     </>
   );
 };
