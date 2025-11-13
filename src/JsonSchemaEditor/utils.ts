@@ -42,7 +42,7 @@ export enum DataType {
 
 export const getDefaultSchema = (
   dataType: DataType,
-  includeSchema?: boolean,
+  includeSchema?: boolean
 ): JSONSchema7 => {
   switch (dataType) {
     case DataType.number:
@@ -155,7 +155,7 @@ export const random = () => {
 
 export const handleTypeChange = (
   newValue: JSONSchema7TypeName,
-  rootChange: boolean,
+  rootChange: boolean
 ): JSONSchema7 => {
   switch (newValue) {
     case "array":
@@ -165,7 +165,7 @@ export const handleTypeChange = (
     default:
       return getDefaultSchema(
         (DataType as any)[newValue],
-        rootChange,
+        rootChange
       ) as JSONSchema7;
   }
 };
@@ -179,8 +179,8 @@ export const renameKeys = R.curry(
         return acc;
       },
       {},
-      R.keys(object) as string[],
-    ),
+      R.keys(object) as string[]
+    )
 );
 
 export const deleteKey = (key: string, object: any) => {
