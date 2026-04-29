@@ -1,5 +1,5 @@
 {
-  "name": "@djokodonev/json-schema-editor",
+  "name": "@djokodonev/jsonschema-editor-react",
   "version": "3.0.0",
   "description": "JsonSchema Editor React Control",
   "repository": "https://github.com/djokodonev/jsonschema-editor-react",
