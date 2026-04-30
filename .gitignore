@@ -70,3 +70,7 @@ yarn-error.log
 /.idea/misc.xml
 /.idea/modules.xml
 /.idea/vcs.xml
+
+# Stray "> nul" / "2>nul" redirect captures from cmd.exe-style commands run in Cygwin/bash
+nul
+backend/nul
