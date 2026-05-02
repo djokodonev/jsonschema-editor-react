@@ -25,7 +25,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "storybook": "rimraf docs && storybook dev -p 6006",
-    "build-storybook": "rimraf docs && storybook build --docs -o docs"
+    "build-storybook": "rimraf docs && storybook build --docs -o docs",
+    "_dedupe-host-deps": "node -e \"const fs=require('fs'),p=require('path');for(const d of ['react','react-dom','antd','@ant-design']){const t=p.join('node_modules',d);if(fs.existsSync(t)){fs.rmSync(t,{recursive:true,force:true});console.log('[dedupe] removed',t);}}\"",
+    "postinstall": "npm run _dedupe-host-deps --silent || true"
   },
   "eslintConfig": {
     "extends": "react-app",
@@ -56,13 +58,18 @@
     "@emotion/react": "^11.0.0",
     "@emotion/styled": "^11.0.0",
     "ajv": "^8.17.1",
-    "antd": "^5.28.1",
     "ramda": "^0.27.1",
     "use-debounce": "^6.0.1"
   },
   "peerDependencies": {
+    "antd": "^5.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "antd": {
+      "optional": false
+    }
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.2",
