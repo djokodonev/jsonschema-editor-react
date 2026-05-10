@@ -13,6 +13,17 @@
     "registry": "https://registry.npmjs.org"
   },
   "main": "dist/index.js",
+  "module": "dist/index.modern.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.modern.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.modern.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist"
   ],
