@@ -1,0 +1,61 @@
+# TypeScript type gate — KAN-530.
+#
+# Before this workflow existed, this repo ran `tsc` NOWHERE. There was no
+# `typecheck` script, and the two workflows that existed do not compile:
+# secret-scan.yml scans files, and npm-publish.yml runs `npm run build` —
+# microbundle, which transpiles with esbuild/rollup rather than type-checking.
+# `react-scripts test` transpiles with babel-jest and Storybook builds with
+# webpack+babel; both strip types without checking them. A type error anywhere
+# in this repo was caught by no tool at all.
+#
+# `npm run typecheck` runs BOTH views:
+#   tsconfig.json       — the microbundle build input (src, minus stories)
+#   tsconfig.test.json  — the whole tracked SOURCE tree (adds .storybook/preview.tsx
+#                         and src/stories/**; still excludes dist/ and docs/,
+#                         which are committed build output)
+# Running only the first would leave 3 of 24 tracked source .ts/.tsx files
+# unchecked. See tsconfig.test.json for why dist/ stays out.
+#
+# node-version is 20, not the 12 that npm-publish.yml pins. That pin is stale —
+# Storybook 8 and react-scripts 5 cannot run on node 12 — and this repo's
+# `engines` range (`>=13.5.0`) admits 20. npm-publish.yml is left untouched.
+
+name: Typecheck
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# Declared explicitly rather than inherited from the repo default (KAN-442).
+permissions:
+  contents: read
+
+concurrency:
+  group: typecheck-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: TypeScript type check (build + tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # .npmrc maps @djokodonev to npm.pkg.github.com and reads the token from
+      # this env var. Nothing in the dependency tree actually resolves from that
+      # registry today (the mapping exists for publishing), but the variable is
+      # supplied so install does not depend on that staying true.
+      - name: Install dependencies
+        run: npm ci
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: TypeScript type check (build + tests)
+        run: npm run typecheck

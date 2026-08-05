@@ -1,0 +1,30 @@
+// Type-check view of the tracked SOURCE tree — KAN-530.
+//
+// Why this file exists, and why tsconfig.json excludes what it excludes:
+//
+//   tsconfig.json describes the BUILD INPUT for microbundle, whose entry is
+//   src/index.ts. Storybook is a development surface, not part of the
+//   published package, so `include: ["src"]` + `exclude: [... "src/stories"]`
+//   is correct for the build. But nothing else type-checked those files
+//   either: react-scripts test transpiles with babel-jest and Storybook builds
+//   with webpack+babel, and BOTH strip types without checking them. So
+//   .storybook/preview.tsx and src/stories/** — 3 tracked files — were checked
+//   by no tool at all.
+//
+// This view re-includes them. `npm run typecheck` runs both configs and CI
+// runs `npm run typecheck`.
+//
+// `dist` STAYS excluded, deliberately. Its 25 tracked .d.ts files are
+// microbundle OUTPUT committed for consumers; type-checking generated
+// artifacts tells you nothing about the source and would fail the gate on
+// stale build output. `docs` (the built Storybook static site) is excluded for
+// the same reason.
+//
+// DO NOT widen `exclude` to cover a source file to make a failure go away. An
+// excluded file is an unchecked file, which is the exact defect this config was
+// added to close. Fix the type error instead.
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", ".storybook/preview.tsx"],
+  "exclude": ["node_modules", "dist", "docs"]
+}
