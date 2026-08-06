@@ -12,6 +12,16 @@
 
 ## Recent Changes
 
+### 3.1.1 (2026) — React 18 install fix
+
+3.1.0 declared `@ant-design/v5-patch-for-react-19` as an **optional** peer
+dependency. GitHub Packages' packument drops `peerDependenciesMeta`, so the
+`optional: true` marker never reached consumers and npm treated the patch as a
+required peer. Because the patch itself peers `react >=19.0.0`, this broke
+`npm install --strict-peer-deps` on React 18 hosts — the opposite of the
+intent. 3.1.1 removes that peer entirely; React 19 hosts install the patch
+themselves (see below). **Do not use 3.1.0 on React 18.**
+
 ### 3.1.0 (2026) — React 19 support
 
 - Peer ranges widened to `react ^18.0.0 || ^19.0.0` and
@@ -19,10 +29,11 @@
   are unaffected. Before 3.1.0 the peers were React-18-only, which made
   `npm install` fail outright (`ERESOLVE`) for any React 19 host and forced an
   `overrides` workaround.
-- Added `@ant-design/v5-patch-for-react-19` as an **optional** peer dependency,
-  with setup instructions under "React 19 hosts must apply the Ant Design
-  patch" below. The package uses antd's static `message.error` API, which needs
-  that patch on React 19.
+- Documented that React 19 hosts must install `@ant-design/v5-patch-for-react-19`
+  themselves — see "React 19 hosts must apply the Ant Design patch" below. The
+  package uses antd's static `message.error` API, which needs that patch on
+  React 19. (3.1.0 declared it as an optional peer; see 3.1.1 above for why that
+  had to be reverted.)
 - Internal `JSX.Element` annotations changed to `React.JSX.Element`. React 19's
   `@types/react` removed the global `JSX` namespace.
 
@@ -122,9 +133,14 @@ npm install @ant-design/v5-patch-for-react-19
 import '@ant-design/v5-patch-for-react-19';
 ```
 
-It is declared as an optional peer dependency so React 18 hosts are not forced
-to install it. Nothing type-checks or fails at install time if you forget it —
-the symptom is a missing toast at runtime.
+It is **not** declared as a peer dependency, deliberately. GitHub Packages'
+packument drops `peerDependenciesMeta`, so an `optional: true` marker does not
+survive publication and npm treats the peer as mandatory — and since the patch
+itself peers `react >=19.0.0`, declaring it would break every React 18 consumer
+under `--strict-peer-deps`. Install it yourself on React 19 hosts.
+
+Nothing type-checks or fails at install time if you forget it — the symptom is a
+missing toast at runtime.
 
 ## Props
 
