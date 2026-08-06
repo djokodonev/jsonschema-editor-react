@@ -12,6 +12,34 @@
 
 ## Recent Changes
 
+### 3.1.2 (2026) — runtime security fixes (KAN-692)
+
+No API change. Clears every advisory that this package shipped into consumers'
+`node_modules`. `npm audit --omit=dev` goes from 4 findings (1 high,
+3 moderate) to **0**.
+
+- `ajv` `^8.17.1` → `^8.20.0`. Fixes a ReDoS in ajv's `$data` option
+  (GHSA-2g4f-4pwh-qvx6, patched in 8.18.0) and, transitively, drags `fast-uri`
+  up with it.
+- `fast-uri` 3.0.3 → 3.1.5 (transitive, via `ajv`). Five HIGH advisories:
+  path traversal via percent-encoded dot segments (GHSA-q3j6-qgpj-74h6) and
+  four host-confusion variants (GHSA-v39h-62p7-jpjc, GHSA-v2hh-gcrm-f6hx,
+  GHSA-7p8r-x3mc-p8w7, GHSA-4c8g-83qw-93j6). Patched at 3.1.5.
+- `@babel/runtime` 7.26.0 → 7.29.7 (transitive, via `@emotion/react`).
+  Inefficient RegExp complexity in transpiled named capture groups
+  (GHSA-968p-4wvh-cqc8).
+- `yaml` 1.10.2 → 1.10.3 (transitive, via
+  `@emotion/babel-plugin` → `babel-plugin-macros` → `cosmiconfig`). Stack
+  overflow on deeply nested collections (GHSA-48c2-rrv3-qjmp).
+
+Only `ajv` needed a manifest change; the other three moved within ranges their
+parents already declared and were simply pinned back by the lockfile. No
+`overrides` were added and no advisory was suppressed.
+
+The remaining `npm audit` findings are all **dev-scope**, reached through
+`react-scripts@5.0.1` / Storybook. They are not installed by consumers of this
+package and are structural to an unmaintained toolchain — tracked separately.
+
 ### 3.1.1 (2026) — React 18 install fix
 
 3.1.0 declared `@ant-design/v5-patch-for-react-19` as an **optional** peer
