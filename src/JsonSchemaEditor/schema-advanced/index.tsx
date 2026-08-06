@@ -16,7 +16,7 @@ export const AdvancedSettings: React.FunctionComponent<
 
   const itemType = Array.isArray(item.type) ? item.type[0] : item.type;
 
-  const getAdvancedView = (): JSX.Element | undefined => {
+  const getAdvancedView = (): React.JSX.Element | undefined => {
     switch (itemType) {
       case "string":
         return <AdvancedString item={item} onUpdate={onUpdate} />;

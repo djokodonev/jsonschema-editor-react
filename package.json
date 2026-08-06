@@ -1,6 +1,6 @@
 {
   "name": "@djokodonev/jsonschema-editor-react",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "JsonSchema Editor React Control",
   "repository": "https://github.com/djokodonev/jsonschema-editor-react",
   "license": "Apache 2.0",
@@ -25,13 +25,15 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "readme.md"
   ],
   "keywords": [
     "react"
   ],
   "scripts": {
     "start": "react-scripts start",
+    "prepublishOnly": "node scripts/guard-publish-registry.mjs",
     "build": "microbundle --jsx React.createElement",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "react-scripts test",
@@ -72,13 +74,17 @@
     "use-debounce": "^6.0.1"
   },
   "peerDependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "antd": "^5.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "antd": {
       "optional": false
+    },
+    "@ant-design/v5-patch-for-react-19": {
+      "optional": true
     }
   },
   "devDependencies": {

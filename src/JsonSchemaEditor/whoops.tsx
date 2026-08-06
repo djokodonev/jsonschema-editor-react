@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export const Whoops = (): JSX.Element => {
+export const Whoops = (): React.JSX.Element => {
   return (
     <svg viewBox="0 0 640 640" width={640} height={640}>
       <defs>

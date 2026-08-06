@@ -10,9 +10,23 @@
   <a href="https://optum.github.io/jsonschema-editor-react/"><img src="https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg"></a>
 </p>
 
-## Recent Changes (2024)
+## Recent Changes
 
-### Major Refactoring
+### 3.1.0 (2026) — React 19 support
+
+- Peer ranges widened to `react ^18.0.0 || ^19.0.0` and
+  `react-dom ^18.0.0 || ^19.0.0`. React 18 is retained, so unmigrated consumers
+  are unaffected. Before 3.1.0 the peers were React-18-only, which made
+  `npm install` fail outright (`ERESOLVE`) for any React 19 host and forced an
+  `overrides` workaround.
+- Added `@ant-design/v5-patch-for-react-19` as an **optional** peer dependency,
+  with setup instructions under "React 19 hosts must apply the Ant Design
+  patch" below. The package uses antd's static `message.error` API, which needs
+  that patch on React 19.
+- Internal `JSX.Element` annotations changed to `React.JSX.Element`. React 19's
+  `@types/react` removed the global `JSX` namespace.
+
+### Major Refactoring (2024)
 
 This project has been significantly refactored to use modern React patterns and Ant Design:
 
@@ -57,24 +71,24 @@ Benefits include:
 ### Prerequisites
 
 - Node.js >= 12.14.0
-- React >= 18.2.0
-- React DOM >= 18.2.0
+- React 18 or React 19
+- React DOM 18 or React DOM 19
 
 ### Install Package
 
 ```shell
-npm install @djokodonev/json-schema-editor
+npm install @djokodonev/jsonschema-editor-react
 ```
 
 or
 
 ```shell
-yarn add @djokodonev/json-schema-editor
+yarn add @djokodonev/jsonschema-editor-react
 ```
 
 ### Install Peer Dependencies
 
-The component requires React 18 and Ant Design:
+The component requires React and Ant Design v5:
 
 ```shell
 npm install react react-dom antd
@@ -86,7 +100,31 @@ or
 yarn add react react-dom antd
 ```
 
+Peer ranges are `react ^18 || ^19`, `react-dom ^18 || ^19`, `antd ^5`. React 18
+and React 19 hosts are both supported.
+
 **Note**: Ant Design v5 uses CSS-in-JS, so no manual CSS imports are required. The component automatically wraps itself with `ConfigProvider` to ensure styles are applied correctly.
+
+### React 19 hosts must apply the Ant Design patch
+
+The editor reports a duplicate-property name through antd's static
+`message.error` API, which internally relies on the legacy `ReactDOM.render`
+that React 19 removed. On a React 19 host that error toast silently fails to
+appear unless the host applies Ant Design's compatibility patch **once, at the
+app entry point**:
+
+```shell
+npm install @ant-design/v5-patch-for-react-19
+```
+
+```tsx
+// index.tsx / main.tsx — before rendering the app
+import '@ant-design/v5-patch-for-react-19';
+```
+
+It is declared as an optional peer dependency so React 18 hosts are not forced
+to install it. Nothing type-checks or fails at install time if you forget it —
+the symptom is a missing toast at runtime.
 
 ## Props
 
@@ -197,7 +235,7 @@ The example JSON generator creates realistic examples based on:
 - ✅ **Schema Preview**: View generated JSON Schema and example JSON data
 - ✅ **Example JSON Generator**: Automatically generates example JSON that validates against your schema
 - ✅ Type-safe with TypeScript
-- ✅ Modern React 18 patterns
+- ✅ Modern React patterns — runs on React 18 and React 19
 - ✅ Ant Design UI components
 
 ## Development

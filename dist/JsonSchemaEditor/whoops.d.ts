@@ -1,2 +1,2 @@
-/// <reference types="react" />
-export declare const Whoops: () => JSX.Element;
+import * as React from "react";
+export declare const Whoops: () => React.JSX.Element;
