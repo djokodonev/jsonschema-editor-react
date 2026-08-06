@@ -1,0 +1,108 @@
+# CI gate — typecheck, test, build.
+#
+# This file replaces two earlier workflows:
+#
+#   npm-publish.yml  (deleted, KAN-694)  — published on every GitHub release.
+#   typecheck.yml    (deleted, KAN-694)  — the KAN-530 type gate, a strict
+#                                          subset of what runs below.
+#
+# WHY npm-publish.yml IS GONE
+# ---------------------------
+# It carried two publish jobs, both wrong:
+#
+#   publish-npm — targeted the PUBLIC npm registry (the default public host,
+#     spelled out in the deleted file) for a package declaring
+#     `publishConfig.access: restricted`. Measured
+#     2026-08-06: it could not in fact have reached public npm, because the
+#     committed `.npmrc` maps `@djokodonev:registry` to npm.pkg.github.com and
+#     a scoped mapping outranks setup-node's `registry=` line — the exact
+#     precedence quirk KAN-409 is about. That is an accident, not a control.
+#     Nothing about this package should ever be aimed at public npm.
+#
+#   publish-gpr — targeted npm.pkg.github.com using the auto-provided
+#     secrets.GITHUB_TOKEN, so unlike publish-npm it needed no configured
+#     secret to authenticate. This was the genuinely reachable production
+#     publish path: a GitHub release would have shipped an unreviewed version,
+#     bypassing publish.sh's dirty-tree check and per-version authorisation.
+#     Only the prepublishOnly guard stood in the way.
+#
+# Releases are cut by ./publish.sh — manual, guarded by
+# scripts/guard-publish-registry.mjs, and authorised per exact version. CI does
+# not publish. There is one release path, and this is not it.
+#
+# WHAT THIS GATE CHECKS (and why each step earns its place, KAN-530)
+# ------------------------------------------------------------------
+# Before KAN-530 this repo ran `tsc` NOWHERE. `npm run build` is microbundle,
+# which transpiles with esbuild/rollup rather than type-checking; the tests run
+# through babel-jest and Storybook builds with webpack+babel — all three strip
+# types without checking them. A type error was caught by no tool at all.
+#
+# `npm run typecheck` runs BOTH views:
+#   tsconfig.json       — the microbundle build input (src, minus stories)
+#   tsconfig.test.json  — the whole tracked SOURCE tree (adds
+#                         .storybook/preview.tsx and src/stories/**; still
+#                         excludes dist/ and docs/, which are committed build
+#                         output). See tsconfig.test.json for why dist/ stays out.
+# Running only the first would leave 3 of 24 tracked source files unchecked.
+#
+# The old `build` job ran `npm ci` and nothing else while acting as a `needs:`
+# gate for both publish jobs — it verified nothing, which is worse than absent
+# because it read as a gate. Test and build now actually run.
+#
+# node-version is 20, not the 12 the deleted workflow pinned. That pin was
+# stale (Storybook 8 and react-scripts 5 cannot run on node 12, and the
+# lockfile is lockfileVersion 3, which npm 6 cannot install), and this repo's
+# `engines` range (`>=13.5.0`) admits 20.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# Declared explicitly rather than inherited from the repo default (KAN-442).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # .npmrc maps @djokodonev to npm.pkg.github.com and reads the token from
+      # this env var. Nothing in the dependency tree actually resolves from that
+      # registry today (the mapping exists for publishing), and the repo has no
+      # Actions secrets configured, so this expands to an empty string and
+      # install still succeeds. The variable is supplied so that install does
+      # not silently start depending on that staying true.
+      - name: Install dependencies
+        run: npm ci
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: TypeScript type check (build + tests)
+        run: npm run typecheck
+
+      # CI=true makes react-scripts test run once and exit instead of watching.
+      # GitHub Actions sets it already; stated here so the step is correct when
+      # run anywhere else.
+      - name: Test
+        run: npm test
+        env:
+          CI: true
+
+      - name: Build
+        run: npm run build
