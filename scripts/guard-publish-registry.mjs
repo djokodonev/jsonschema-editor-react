@@ -35,6 +35,9 @@
  *
  * THE GATE
  * --------
+ *   0. `package.json` must declare no optional peers. GitHub Packages cannot
+ *      honour them (KAN-691), so publishing one ships a dependency graph we
+ *      did not write. Any => REFUSE, before any network call.
  *   1. Resolve the effective registry (ask npm). Cannot parse => REFUSE.
  *   2. `EGAV_PUBLISH_REGISTRY` must be set, stating the intended target.
  *      Unset => REFUSE. This is what stops a bare `npm publish`.
@@ -54,6 +57,16 @@
  * --------------
  *   Production release:   ./publish.sh          (sets both vars for you)
  *   Local test registry:  see README "Testing a publish locally"
+ *
+ * BYTE-IDENTITY (KAN-473)
+ * -----------------------
+ * This file is byte-identical across every repo publishing under the scope.
+ * That is the property that makes "did all five get the fix?" a single sha256
+ * comparison — and it had already lapsed once: KAN-691's optional-peer check
+ * reached four repos and never reached egav-billing-frontend, which therefore
+ * had no such gate at all for a month. Per-repo prose is what broke it, so the
+ * incident evidence below is a shared list rather than each repo describing
+ * only its own. Do not personalise this file. Change it once, copy it to all.
  */
 
 import { readFileSync } from 'node:fs';
@@ -103,6 +116,65 @@ function hostOf(url) {
 }
 
 /**
+ * npm refusals that occur BEFORE npm prints "Publishing to <url>" (KAN-473).
+ *
+ * These are npm declining the publish on its own merits — a different
+ * situation from the guard being unable to read npm's output, though both
+ * arrive at the same place because neither produces the notice we parse.
+ *
+ * Naming the cause matters at release time. The generic refusal says the
+ * registry could not be determined, which reads as a guard malfunction, and
+ * the tempting response to a guard that looks broken is to bypass it. In all
+ * three cases below the guard is working and the version is wrong.
+ *
+ * Diagnostics only: every entry still refuses. First match wins.
+ */
+const NPM_REFUSALS = [
+  {
+    // npm E403 / EPUBLISHCONFLICT. The version is followed by a sentence-ending
+    // period, so the capture is lazy up to a trailing dot — `[^\s.]+` would
+    // stop at the first dot inside the version and report "0" for "0.31.0".
+    test: /cannot publish over the previously published versions?:?\s*(\S+?)\.?(?=\s|$)/i,
+    headline: (m) => `npm refused: version ${m[1]} is already published.`,
+    detail: (m) => [
+      '  npm will not overwrite a published version, and neither should we —',
+      '  consumers may already have resolved it.',
+      '',
+      `  Bump the version in package.json past ${m[1]} and re-run. If this is a`,
+      '  re-run of a release that already went out, there is nothing to do: the',
+      '  artifact is published.',
+    ],
+  },
+  {
+    test: /must specify a tag using --tag when publishing a prerelease/i,
+    headline: () => `npm refused: ${pkg.version} is a prerelease and needs an explicit tag.`,
+    detail: () => [
+      '  npm will not move the `latest` tag to a prerelease implicitly, because',
+      '  every consumer on a caret range would pick it up.',
+      '',
+      '    npm publish --tag next',
+      '',
+      '  Or cut a stable version instead. Do not remove the prerelease suffix',
+      '  from package.json just to make this message go away — that publishes an',
+      '  unfinished build as the version everyone installs.',
+    ],
+  },
+  {
+    test: /cannot implicitly apply the "?latest"? tag because previously published version (\S+) is higher/i,
+    headline: (m) => `npm refused: ${pkg.version} is lower than the published ${m[1]}.`,
+    detail: (m) => [
+      `  Publishing it would leave \`latest\` pointing at ${m[1]}, so nothing would`,
+      '  install what you just shipped.',
+      '',
+      `  Either bump past ${m[1]}, or — if this is a deliberate backport to an`,
+      '  older line — publish it under its own tag:',
+      '',
+      '    npm publish --tag legacy',
+    ],
+  },
+];
+
+/**
  * Ask npm where this publish is actually going.
  * Returns the registry URL as npm itself resolved it.
  */
@@ -135,6 +207,25 @@ function resolveEffectiveRegistry() {
   const match = output.match(/Publishing to (\S+)/i);
 
   if (!match) {
+    const tail = output.split('\n').filter((l) => l.trim()).slice(-15).map((l) => `    ${l}`);
+
+    // Did npm refuse for a reason we recognise? Report THAT, not our symptom.
+    for (const refusal of NPM_REFUSALS) {
+      const hit = output.match(refusal.test);
+      if (hit) {
+        refuse(refusal.headline(hit), [
+          ...refusal.detail(hit),
+          '',
+          '  The guard could not read a registry because npm never got as far as',
+          '  choosing one. It is refusing on npm\'s behalf, not malfunctioning —',
+          '  do not bypass it.',
+          '',
+          '  npm output was:',
+          ...tail,
+        ]);
+      }
+    }
+
     refuse('Could not determine which registry this publish would reach.', [
       '  The guard runs `npm publish --dry-run --ignore-scripts` and reads the',
       '  "Publishing to <url>" notice. npm printed no such line, so the target',
@@ -143,7 +234,7 @@ function resolveEffectiveRegistry() {
       result.error && `  spawn error: ${result.error.message}`,
       result.error && '',
       '  npm output was:',
-      ...(output.split('\n').filter((l) => l.trim()).slice(-15).map((l) => `    ${l}`)),
+      ...tail,
       output.trim() === '' && '    (no output)',
     ]);
   }
@@ -162,6 +253,47 @@ function localRecipe(target) {
 // ── Recursion sentinel ──────────────────────────────────────────────────────
 if (process.env.EGAV_PUBLISH_GUARD_ACTIVE === '1') {
   process.exit(0);
+}
+
+// ── 0. `peerDependenciesMeta.optional` cannot survive this registry (KAN-691) ─
+// GitHub Packages strips `peerDependenciesMeta` from the packument it serves,
+// and npm resolves peers from the packument, not from the tarball. So an
+// `optional: true` marker is published correctly and then silently discarded,
+// turning the peer MANDATORY for every consumer. Refuse rather than publish a
+// dependency graph we did not write.
+//
+// The evidence below is shared across every repo carrying this file, not just
+// the incident that repo happened to have. Per-repo prose is what let this
+// check miss egav-billing-frontend entirely (KAN-473).
+const OPTIONAL_PEER_INCIDENTS = [
+  '  Measured 2026-08-06 (KAN-700): @djokodonev/egav-app-sdk@0.31.0 declared 11',
+  '  optional peers; a consumer declaring only react/react-dom still had vitest,',
+  '  @testing-library/react, @dnd-kit/*, libphonenumber-js and i18n-iso-countries',
+  '  installed — 252 packages of test and feature tooling it never imports.',
+  '',
+  '  Measured 2026-08-06 (KAN-691, KAN-699): egav-automation-widgets@0.6.0 and',
+  '  egav-ai-chat-frontend@0.7.0 each declared @ant-design/v5-patch-for-react-19',
+  '  optional; that package peers react >=19, so every React 18 consumer failed',
+  '  with ERESOLVE. jsonschema-editor-react@3.1.0 shipped the same way.',
+];
+
+const optionalPeers = Object.entries(pkg.peerDependenciesMeta ?? {})
+  .filter(([, meta]) => meta && meta.optional === true)
+  .map(([name]) => name);
+
+if (optionalPeers.length > 0) {
+  refuse('package.json declares optional peers, which this registry cannot honour.', [
+    `  optional peers : ${optionalPeers.join(', ')}`,
+    '',
+    '  GitHub Packages drops `peerDependenciesMeta` from the packument it serves.',
+    '  npm resolves peers from the packument, not the tarball, so every one of',
+    '  these would reach consumers as a MANDATORY peer — the opposite of intent.',
+    '',
+    ...OPTIONAL_PEER_INCIDENTS,
+    '',
+    '  Fix: drop the peer entirely and document the requirement in the README,',
+    '  or declare it as a real (mandatory) peer if it genuinely is one.',
+  ]);
 }
 
 // ── 1. Where is this publish actually going? ────────────────────────────────
