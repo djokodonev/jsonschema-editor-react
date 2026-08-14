@@ -23,8 +23,23 @@
 // DO NOT widen `exclude` to cover a source file to make a failure go away. An
 // excluded file is an unchecked file, which is the exact defect this config was
 // added to close. Fix the type error instead.
+//
+// KAN-695 additions:
+//   `tests/**` and `vitest.config.ts` join the checked set for the same reason
+//   the stories did -- vitest transforms with esbuild, which strips types without
+//   checking them, so an untype-checked test file is an unchecked file.
+//
+//   `moduleResolution: "bundler"` overrides the build view's "node". vitest,
+//   @vitest/coverage-v8 and @testing-library/* expose their types only through
+//   package `exports` maps, which classic node resolution cannot read. This is
+//   the DEV view; tsconfig.json keeps "node" so the microbundle build input is
+//   resolved exactly as before.
 {
   "extends": "./tsconfig.json",
-  "include": ["src", ".storybook/preview.tsx"],
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
+  },
+  "include": ["src", "tests", ".storybook/preview.tsx", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", "docs"]
 }

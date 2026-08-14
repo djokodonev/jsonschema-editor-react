@@ -12,6 +12,31 @@
 
 ## Recent Changes
 
+### Unreleased — test harness migrated off CRA (KAN-695)
+
+No runtime or API change; `dist` keeps the same entrypoints. Development only.
+
+- **Tests now run on React 19.** The suite previously ran under `react-scripts`
+  with `@testing-library/react` 10, whose cleanup calls
+  `ReactDOM.unmountComponentAtNode` — removed in React 19. So the package
+  claimed React 19 support (3.1.0/3.1.1) while its own tests could only ever
+  execute against React 18. The harness is now vitest + jsdom +
+  `@testing-library/react` 16 on `react@19.2.8`, matching the sibling packages.
+- **The suite went from 1 test to 176.** The single pre-existing test rendered
+  the component and asserted nothing. Coverage is now 95.0% of statements and
+  90.1% of functions across the object/array/string/number/boolean editors, the
+  preview modal, the example generator, ajv validation, and
+  rename/add/delete/required toggling — with thresholds enforced in
+  `vitest.config.ts`.
+- **Storybook moved to the Vite builder.** `@storybook/preset-create-react-app`
+  peers `react-scripts`, so it kept CRA in the tree; `@storybook/react-vite`
+  replaces it and reuses the Vite that vitest already needs.
+- **`scripts/test-guard-publish-registry.mjs` is now wired to `npm test`.** Its
+  18 checks (KAN-473) existed but were run by no script and no workflow.
+- `@types/jest@^25` and `@types/node@^12` removed/replaced; `rimraf` promoted to
+  a direct devDependency (the storybook scripts use it, and it previously came
+  in only transitively through `react-scripts`).
+
 ### 3.1.2 (2026) — runtime security fixes (KAN-692)
 
 No API change. Clears every advisory that this package shipped into consumers'
@@ -38,7 +63,8 @@ parents already declared and were simply pinned back by the lockfile. No
 
 The remaining `npm audit` findings are all **dev-scope**, reached through
 `react-scripts@5.0.1` / Storybook. They are not installed by consumers of this
-package and are structural to an unmaintained toolchain — tracked separately.
+package. **Largely resolved by KAN-695 below**, which removed `react-scripts`
+entirely.
 
 ### 3.1.1 (2026) — React 18 install fix
 
@@ -81,8 +107,9 @@ This project has been significantly refactored to use modern React patterns and 
   - CSS-in-JS support (no manual CSS imports needed)
 
 - **React 18 Compatibility**: Fully compatible with React 18
-  - Updated `framer-motion` to v12 for React 18 support
   - Proper handling of React 18's rendering model
+  - (React 19 support arrived later — see 3.1.0/3.1.1 above. This package now
+    peers `react ^18 || ^19`.)
 
 - **Bug Fixes**:
   - Fixed enum validation (empty enum arrays no longer cause schema validation errors)
@@ -109,7 +136,8 @@ Benefits include:
 
 ### Prerequisites
 
-- Node.js >= 12.14.0
+- Node.js >= 12.14.0 to consume the package (see `engines`). Building or
+  testing this repo needs Node >= 18 — vitest 3 and Storybook 8 require it.
 - React 18 or React 19
 - React DOM 18 or React DOM 19
 
@@ -310,10 +338,18 @@ Storybook will be available at `http://localhost:6006`
 npm run build-storybook
 ```
 
-> Run tests
+> Run tests (vitest + the publish-guard checks)
 
 ```shell
-npm test
+npm test              # vitest run, then scripts/test-guard-publish-registry.mjs
+npm run test:watch    # vitest in watch mode
+npm run test:coverage # with a v8 coverage report and thresholds
+```
+
+> Type-check both views (build input, and the whole tracked source tree)
+
+```shell
+npm run typecheck
 ```
 
 > Build for production
@@ -326,21 +362,37 @@ npm run build
 
 ### Runtime Dependencies
 
-- `antd`: ^5.28.1 - UI component library
-- `ajv`: ^8.12.0 - JSON Schema validator (Draft 2020-12)
+- `ajv`: ^8.20.0 - JSON Schema validator (Draft 2020-12)
 - `ramda`: ^0.27.1 - Functional utilities
 - `use-debounce`: ^6.0.1 - Debounce hook for input handling
+- `@emotion/react`, `@emotion/styled`: ^11 - declared, but not imported by any
+  module under `src/`. Tracked for removal; see KAN-695.
 
 ### Peer Dependencies
 
-- `react`: ^18.2.0
-- `react-dom`: ^18.2.0
+- `react`: ^18.0.0 || ^19.0.0
+- `react-dom`: ^18.0.0 || ^19.0.0
+- `antd`: ^5.0.0 (required, not optional — the UI is built from antd components)
 
 ### Development Dependencies
 
-- `typescript`: ^4.9.5
-- `storybook`: ^8.4.7
-- `react-scripts`: 5.0.1
+The dev harness is vitest + jsdom + Testing Library, matching the sibling
+packages `egav-automation-widgets-ts` and `egav-data-exchange-widgets-ts`.
+
+- `vitest`: 3.2.7 with `@vitest/coverage-v8` and `jsdom`
+- `@testing-library/react`: 16.3.2 (+ `@testing-library/dom`, `jest-dom`, `user-event`)
+- `react` / `react-dom`: 19.2.8 — the suite runs on React 19
+- `typescript`: ^5
+- `storybook`: 8.6.18 on the Vite builder (`@storybook/react-vite`)
+- `microbundle`: ^0.13.1 — still the bundler; the published `dist` layout is
+  unchanged because two apps import it
+
+> **Removed in KAN-695:** `react-scripts` (CRA, unmaintained),
+> `@storybook/preset-create-react-app`, `@storybook/react-webpack5`,
+> `@types/jest`. Between them they accounted for the great majority of this
+> repo's `npm audit` findings, including all three criticals. Full `npm audit`
+> went from 63 findings (3 critical / 29 high) to 14 (0 critical / 10 high).
+> `npm audit --omit=dev` was already 0 after 3.1.2 and stays 0.
 
 ## Migration from Previous Versions
 

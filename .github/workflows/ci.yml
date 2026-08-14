@@ -34,25 +34,29 @@
 # ------------------------------------------------------------------
 # Before KAN-530 this repo ran `tsc` NOWHERE. `npm run build` is microbundle,
 # which transpiles with esbuild/rollup rather than type-checking; the tests run
-# through babel-jest and Storybook builds with webpack+babel — all three strip
+# through esbuild (vitest) and Storybook builds with Vite — all three strip
 # types without checking them. A type error was caught by no tool at all.
 #
 # `npm run typecheck` runs BOTH views:
 #   tsconfig.json       — the microbundle build input (src, minus stories)
 #   tsconfig.test.json  — the whole tracked SOURCE tree (adds
-#                         .storybook/preview.tsx and src/stories/**; still
-#                         excludes dist/ and docs/, which are committed build
-#                         output). See tsconfig.test.json for why dist/ stays out.
-# Running only the first would leave 3 of 24 tracked source files unchecked.
+#                         .storybook/preview.tsx, src/stories/**, tests/** and
+#                         vitest.config.ts; still excludes dist/ and docs/,
+#                         which are committed build output). See
+#                         tsconfig.test.json for why dist/ stays out.
+# Running only the first would leave the stories, the tests and the vitest
+# config unchecked.
 #
 # The old `build` job ran `npm ci` and nothing else while acting as a `needs:`
 # gate for both publish jobs — it verified nothing, which is worse than absent
 # because it read as a gate. Test and build now actually run.
 #
 # node-version is 20, not the 12 the deleted workflow pinned. That pin was
-# stale (Storybook 8 and react-scripts 5 cannot run on node 12, and the
-# lockfile is lockfileVersion 3, which npm 6 cannot install), and this repo's
-# `engines` range (`>=13.5.0`) admits 20.
+# stale (Storybook 8 and vitest 3 both need Node >= 18, and the lockfile is
+# lockfileVersion 3, which npm 6 cannot install), and this repo's `engines`
+# range (`>=13.5.0`) admits 20. NOTE: `engines` still describes only what a
+# CONSUMER needs at runtime; it has not been narrowed to the toolchain's
+# Node >= 18, because that field is published metadata for two dependent apps.
 
 name: CI
 
@@ -96,13 +100,16 @@ jobs:
       - name: TypeScript type check (build + tests)
         run: npm run typecheck
 
-      # CI=true makes react-scripts test run once and exit instead of watching.
-      # GitHub Actions sets it already; stated here so the step is correct when
-      # run anywhere else.
+      # `npm test` is `vitest run` (single pass, no watch) followed by the
+      # publish-guard checks in scripts/test-guard-publish-registry.mjs. Those
+      # 18 checks existed since KAN-473 but were wired to no script and no
+      # workflow until KAN-695, so they had never run in CI.
+      #
+      # vitest.config.ts also registers the collection floor: if a test file on
+      # disk is not collected, the run fails rather than quietly reporting a
+      # pass over a shrunken suite.
       - name: Test
         run: npm test
-        env:
-          CI: true
 
       - name: Build
         run: npm run build

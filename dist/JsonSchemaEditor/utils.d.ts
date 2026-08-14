@@ -1,4 +1,3 @@
-/// <reference types="ts-toolbelt" />
 import { JSONSchema7, JSONSchema7TypeName } from "../JsonSchemaEditor.types";
 export declare const JSONPATH_JOIN_CHAR = ".";
 export declare enum PropertyType {
