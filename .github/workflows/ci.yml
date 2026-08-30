@@ -63,6 +63,11 @@ name: CI
 on:
   push:
     branches: [master]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.claude/**'
+      - 'AGENTS.md'
   pull_request:
     branches: [master]
 
