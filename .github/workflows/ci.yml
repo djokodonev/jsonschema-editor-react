@@ -61,15 +61,23 @@
 name: CI
 
 on:
+  # KAN-2303: this suite is the production gate only -- a pull request that
+  # targets `production`, and the merge into it. It no longer runs on every
+  # push to `main`. `main` is deliberately ungated for now (product owner,
+  # 2026-08-31) and is verified locally against disposable containers; the
+  # gate comes back when the current development phase settles.
+  #
+  # No `paths` / `paths-ignore` filter here, on purpose: a path-skipped run
+  # never reports a status, so a filtered workflow used as a required check
+  # blocks its own pull request forever.
+  #
+  # workflow_dispatch is the manual valve -- run the full suite against any
+  # branch on demand without waiting for a promotion.
   push:
-    branches: [master]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.claude/**'
-      - 'AGENTS.md'
+    branches: [production]
   pull_request:
-    branches: [master]
+    branches: [production]
+  workflow_dispatch:
 
 # Declared explicitly rather than inherited from the repo default (KAN-442).
 permissions:
