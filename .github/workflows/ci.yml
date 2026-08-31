@@ -61,22 +61,24 @@
 name: CI
 
 on:
-  # KAN-2303: this suite is the production gate only -- a pull request that
-  # targets `production`, and the merge into it. It no longer runs on every
-  # push to `main`. `main` is deliberately ungated for now (product owner,
-  # 2026-08-31) and is verified locally against disposable containers; the
-  # gate comes back when the current development phase settles.
+  # KAN-2303: this package's suite runs on VERSION CREATION -- the push of a
+  # `v*` tag -- and on demand. It no longer runs on every push to the default
+  # branch.
   #
-  # No `paths` / `paths-ignore` filter here, on purpose: a path-skipped run
-  # never reports a status, so a filtered workflow used as a required check
-  # blocks its own pull request forever.
+  # A tag push is the right gate here because this repository ships by version,
+  # not by promotion: measured 2026-08-31, the package repos carry `v*` tags and
+  # essentially no GitHub Releases (egav-base: 40 tags, 0 releases). Cutting a
+  # release through the GitHub UI creates the tag, so that path fires this too,
+  # and keying on `release` as well would double-fire for one gate.
   #
-  # workflow_dispatch is the manual valve -- run the full suite against any
-  # branch on demand without waiting for a promotion.
+  # The default branch is deliberately ungated for now (product owner,
+  # 2026-08-31) and is verified locally against disposable containers; the gate
+  # returns when the current development phase settles.
+  #
+  # workflow_dispatch is the manual valve -- run the suite against any ref
+  # without cutting a version.
   push:
-    branches: [production]
-  pull_request:
-    branches: [production]
+    tags: ['v*']
   workflow_dispatch:
 
 # Declared explicitly rather than inherited from the repo default (KAN-442).
