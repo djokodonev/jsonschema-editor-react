@@ -300,3 +300,28 @@ describe("AdvancedBoolean", () => {
     expect(applied(onUpdate, withEnum).enum).toEqual([true, false]);
   });
 });
+
+describe("Enabling an absent enum (KAN-3564 / SGR-0020)", () => {
+  // The checkbox state used to be `item.enum !== undefined`, and ticking left `enum`
+  // undefined, so a schema without an enum could never turn the editor on.
+  const cases: Array<[string, JSONSchema7, string]> = [
+    ["string", { type: "string" }, "ENUM Values - One Entry Per Line"],
+    ["number", { type: "number" }, "ENUM Values - One Entry Per Line (numbers only)"],
+    ["boolean", { type: "boolean" }, "ENUM Values - One Entry Per Line (true/false)"],
+  ];
+
+  it.each(cases)("a %s schema with no enum can be switched on, and off again", async (_type, item, placeholder) => {
+    const { container } = render(<AdvancedSettings item={item} onUpdate={vi.fn()} />);
+    const box = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    const area = screen.getByPlaceholderText(placeholder);
+    expect(box.checked).toBe(false);
+    expect(area).toBeDisabled();
+
+    fireEvent.click(box);
+    await waitFor(() => expect(screen.getByPlaceholderText(placeholder)).toBeEnabled());
+    expect((container.querySelector('input[type="checkbox"]') as HTMLInputElement).checked).toBe(true);
+
+    fireEvent.click(container.querySelector('input[type="checkbox"]') as Element);
+    await waitFor(() => expect(screen.getByPlaceholderText(placeholder)).toBeDisabled());
+  });
+});

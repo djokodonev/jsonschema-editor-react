@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEnumToggle } from "../useEnumToggle";
 import { JSONSchema7 } from "../../JsonSchemaEditor.types";
 import { Form, InputNumber, Checkbox, Input, Row, Col } from "antd";
 
@@ -20,7 +21,7 @@ export const AdvancedNumber: React.FunctionComponent<AdvancedNumberProps> = (
     return array;
   };
 
-  const isEnumChecked = item.enum !== undefined;
+  const [isEnumChecked, setEnumTicked] = useEnumToggle(item.enum !== undefined);
   const enumData = item.enum ? (item.enum as number[]) : [];
   const enumValue = enumData?.map(String).join("\n") || "";
 
@@ -77,6 +78,7 @@ export const AdvancedNumber: React.FunctionComponent<AdvancedNumberProps> = (
             <Checkbox
               checked={isEnumChecked}
               onChange={(e) => {
+                setEnumTicked(e.target.checked);
                 onUpdate((prev) => {
                   if (!e.target.checked) {
                     // Remove enum when unchecked
