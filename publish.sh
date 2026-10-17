@@ -82,7 +82,14 @@ export GITHUB_PACKAGES_TOKEN="$TOKEN"
 export EGAV_PUBLISH_REGISTRY="https://npm.pkg.github.com"
 export EGAV_PUBLISH_RELEASE="$NAME@$VERSION"
 
-npm publish --userconfig="$NPMRC"
+# KAN-3586: under Git Bash on Windows mktemp returns an MSYS path (/tmp/...) the native npm
+# cannot read, so the one-shot config was ignored and the publish failed with ENEEDAUTH.
+# Hand npm a path it can open; elsewhere cygpath does not exist and the path is unchanged.
+NPMRC_ARG="$NPMRC"
+if command -v cygpath >/dev/null 2>&1; then
+  NPMRC_ARG="$(cygpath -m "$NPMRC")"
+fi
+npm publish --userconfig="$NPMRC_ARG"
 
 echo
 echo "✓ Published $NAME@$VERSION to https://npm.pkg.github.com"
