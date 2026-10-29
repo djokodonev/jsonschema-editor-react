@@ -11,7 +11,8 @@
 # and reports them rather than overwriting.
 #
 # Grouping: minor and patch bumps arrive as ONE pull request per ecosystem per
-# week. Major bumps are deliberately left ungrouped so each gets its own
+# month (monthly by the product owner's call, 2026-10-29: it was weekly and cost
+# ~6,200 CI minutes in October 2026). Major bumps are deliberately left ungrouped so each gets its own
 # reviewable pull request.
 #
 # Scope: this covers *version* updates only. Dependabot *security* updates are a
@@ -24,8 +25,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "monthly"
       time: "06:00"
       timezone: "Etc/UTC"
     open-pull-requests-limit: 5
@@ -42,8 +42,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "monthly"
       time: "06:00"
       timezone: "Etc/UTC"
     open-pull-requests-limit: 5
