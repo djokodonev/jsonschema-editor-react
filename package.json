@@ -76,29 +76,36 @@
     "@ant-design/v5-patch-for-react-19": "1.0.3",
     "@chromatic-com/storybook": "^3.2.2",
     "@storybook/addon-console": "^1.2.3",
-    "@storybook/addon-essentials": "8.6.18",
-    "@storybook/addon-links": "8.6.18",
-    "@storybook/react": "8.6.18",
-    "@storybook/react-vite": "8.6.18",
-    "@storybook/test": "8.6.18",
+    "@storybook/addon-essentials": "8.6.19",
+    "@storybook/addon-links": "8.6.19",
+    "@storybook/react": "8.6.19",
+    "@storybook/react-vite": "8.6.19",
+    "@storybook/test": "8.6.19",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "^14.0.0",
-    "@types/node": "^20.19.40",
+    "@types/node": "^22.19.0",
     "@types/ramda": "^0.27.40",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "^4.0.0",
-    "@vitest/coverage-v8": "3.2.7",
+    "@vitest/coverage-v8": "5.1.1",
     "antd": "^5.22.1",
     "jsdom": "^23.0.0",
     "microbundle": "^0.13.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "rimraf": "^5.0.10",
-    "storybook": "8.6.18",
+    "storybook": "8.6.19",
     "typescript": "^5.0.0",
-    "vitest": "3.2.7"
+    "vitest": "5.1.1"
+  },
+  "overrides": {
+    "rollup-plugin-typescript2": {
+      "@rollup/pluginutils": {
+        "picomatch": "2.3.1"
+      }
+    }
   }
 }

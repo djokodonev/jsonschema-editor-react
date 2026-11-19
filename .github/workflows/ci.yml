@@ -51,7 +51,9 @@
 # gate for both publish jobs — it verified nothing, which is worse than absent
 # because it read as a gate. Test and build now actually run.
 #
-# node-version is 20, not the 12 the deleted workflow pinned. That pin was
+# node-version is 22 (KAN-4960: vitest 5, which drops the vulnerable tinypool, needs
+# Node ^22.12; Node 20 reached end of life in April 2026). It was 20 before that,
+# and 12 in the deleted workflow. The 12 pin was
 # stale (Storybook 8 and vitest 3 both need Node >= 18, and the lockfile is
 # lockfileVersion 3, which npm 6 cannot install), and this repo's `engines`
 # range (`>=13.5.0`) admits 20. NOTE: `engines` still describes only what a
@@ -98,7 +100,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
 
       # .npmrc maps @djokodonev to npm.pkg.github.com and reads the token from
