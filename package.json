@@ -106,6 +106,9 @@
       "@rollup/pluginutils": {
         "picomatch": "2.3.1"
       }
+    },
+    "rollup-plugin-terser": {
+      "serialize-javascript": "7.0.3"
     }
   }
 }
